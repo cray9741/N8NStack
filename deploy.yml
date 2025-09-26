@@ -1,15 +1,4 @@
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: n8n-secrets
-type: Opaque
-stringData:
-  POSTGRES_DB: n8n
-  POSTGRES_USER: n8n
-  POSTGRES_PASSWORD: "changeMeSuperSecret"
-  N8N_ENCRYPTION_KEY: "super-long-random-string-change-me"  # required for encrypting credentials
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,22 +20,9 @@ spec:
           image: postgres:16
           ports:
             - containerPort: 5432
-          env:
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: POSTGRES_DB
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: POSTGRES_PASSWORD
+          envFrom:
+            - secretRef:
+                name: n8n-secrets
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql/data
@@ -98,53 +74,34 @@ spec:
           ports:
             - containerPort: 5678
           env:
-            # ---- n8n basics ----
             - name: GENERIC_TIMEZONE
-              value: "Asia/Kolkata"
+              value: "America/New_York"
             - name: TZ
-              value: "Asia/Kolkata"
+              value: "America/New_York"
             - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
               value: "true"
             - name: N8N_RUNNERS_ENABLED
               value: "true"
             - name: N8N_SECURE_COOKIE
-              value: "true"               # using HTTPS
+              value: "true"
             - name: N8N_HOST
               value: dev.raguls.in
             - name: WEBHOOK_URL
-              value: "https://dev.raguls.in/"
+              value: "n8n.cloudlockops.io"
             - name: N8N_PROTOCOL
               value: "https"
-            - name: N8N_ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: N8N_ENCRYPTION_KEY
 
-            # ---- PostgreSQL backend for n8n ----
+            # Database config
             - name: DB_TYPE
               value: "postgresdb"
             - name: DB_POSTGRESDB_HOST
               value: "postgres-service"
             - name: DB_POSTGRESDB_PORT
               value: "5432"
-            - name: DB_POSTGRESDB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: POSTGRES_DB
-            - name: DB_POSTGRESDB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: POSTGRES_USER
-            - name: DB_POSTGRESDB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-secrets
-                  key: POSTGRES_PASSWORD
 
-          # No volume mounts for n8n itself (per your request)
+          envFrom:
+            - secretRef:
+                name: n8n-secrets
 ---
 apiVersion: v1
 kind: Service
@@ -194,7 +151,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`dev.raguls.in`)
+    - match: Host(`n8n.cloudlockops.io`)
       kind: Rule
       middlewares:
         - name: redirect-to-https
@@ -210,7 +167,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`dev.raguls.in`) && PathPrefix(`/`)
+    - match: Host(`n8n.cloudlockops.io`) && PathPrefix(`/`)
       kind: Rule
       middlewares:
         - name: secure-headers
