@@ -64,44 +64,70 @@ spec:
       labels:
         app: n8n
     spec:
-      initContainers:
-        - name: wait-for-postgres
-          image: busybox:1.36
-          command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo "waiting for postgres"; sleep 2; done']
-      containers:
-        - name: n8n
-          image: docker.n8n.io/n8nio/n8n
-          ports:
-            - containerPort: 5678
-          env:
-            - name: GENERIC_TIMEZONE
-              value: "America/New_York"
-            - name: TZ
-              value: "America/New_York"
-            - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
-              value: "true"
-            - name: N8N_RUNNERS_ENABLED
-              value: "true"
-            - name: N8N_SECURE_COOKIE
-              value: "true"
-            - name: N8N_HOST
-              value: n8n.cloudlockops.io
-            - name: WEBHOOK_URL
-              value: "n8n.cloudlockops.io"
-            - name: N8N_PROTOCOL
-              value: "https"
+  initContainers:
+    - name: wait-for-postgres
+      image: postgres:16
+      command: ['sh','-c','until pg_isready -h postgres-service -p 5432 -U "$POSTGRES_USER"; do echo "waiting for postgres"; sleep 2; done']
+      env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secrets
+              key: POSTGRES_USER
+  containers:
+    - name: n8n
+      image: docker.n8n.io/n8nio/n8n
+      ports:
+        - containerPort: 5678
+      env:
+        # ---- n8n basics ----
+        - name: GENERIC_TIMEZONE
+          value: "Asia/Kolkata"
+        - name: TZ
+          value: "Asia/Kolkata"
+        - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+          value: "true"
+        - name: N8N_RUNNERS_ENABLED
+          value: "true"
+        - name: N8N_SECURE_COOKIE
+          value: "true"
+        - name: N8N_HOST
+          value: n8n.cloudlockop.io
+        - name: WEBHOOK_URL
+          value: "https://n8n.cloudlockops.io/"
+        - name: N8N_PROTOCOL
+          value: "https"
 
-            # Database config
-            - name: DB_TYPE
-              value: "postgresdb"
-            - name: DB_POSTGRESDB_HOST
-              value: "postgres-service"
-            - name: DB_POSTGRESDB_PORT
-              value: "5432"
+        # ---- required for encrypted creds ----
+        - name: N8N_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secrets
+              key: N8N_ENCRYPTION_KEY
 
-          envFrom:
-            - secretRef:
-                name: n8n-secrets
+        # ---- Postgres backend (map secret -> n8n vars) ----
+        - name: DB_TYPE
+          value: "postgresdb"
+        - name: DB_POSTGRESDB_HOST
+          value: "postgres-service"
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secrets
+              key: POSTGRES_DB
+        - name: DB_POSTGRESDB_USER
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secrets
+              key: POSTGRES_USER
+        - name: DB_POSTGRESDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secrets
+              key: POSTGRES_PASSWORD
+
 ---
 apiVersion: v1
 kind: Service
