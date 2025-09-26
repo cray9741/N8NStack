@@ -85,7 +85,7 @@ spec:
             - name: N8N_SECURE_COOKIE
               value: "true"
             - name: N8N_HOST
-              value: dev.raguls.in
+              value: n8n.cloudlockops.io
             - name: WEBHOOK_URL
               value: "n8n.cloudlockops.io"
             - name: N8N_PROTOCOL
