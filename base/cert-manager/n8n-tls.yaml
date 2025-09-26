@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: n8n-tls
+  namespace: default
+spec:
+  secretName: n8n-tls
+  issuerRef:
+    name: cloudflare-issuer
+    kind: ClusterIssuer
+  commonName: n8n.cloudlockops.io
+  dnsNames:
+  - n8n.cloudlockops.io

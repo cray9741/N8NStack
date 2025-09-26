@@ -5,6 +5,10 @@ namespace: default
 resources:
   - bootstrap/secret-bootstrap.yaml
   - rbac/n8n-jobs-rbac.yaml
+  - cert-manager/n8n-tls.yaml
+  - cert-manager/cloudflare-token.yaml
+  - cert-manager/selfsigned.clusterissuer.yaml
+  - cert-manager/cloudflare-token.yaml
   - postgres/deployment.yaml
   - postgres/service.yaml
   - n8n/deployment.yaml

@@ -6,7 +6,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`dev.raguls.in`)
+    - match: Host(`n8n.cloudlockops.io`)
       kind: Rule
       middlewares:
         - name: redirect-to-https
@@ -22,7 +22,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`dev.raguls.in`) && PathPrefix(`/`)
+    - match: Host(`n8n.cloudlockops.io`) && PathPrefix(`/`)
       kind: Rule
       middlewares:
         - name: secure-headers
@@ -30,4 +30,4 @@ spec:
         - name: n8n-service
           port: 5678
   tls:
-    secretName: dev-raguls-in-tls
+    secretName: n8n-tls
