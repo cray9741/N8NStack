@@ -28,5 +28,5 @@ spec:
       volumes:
         - name: pgdata
           hostPath:
-            path: /home/k3s/postgres
+            path: /home/k3s/postgresql-7
             type: DirectoryOrCreate

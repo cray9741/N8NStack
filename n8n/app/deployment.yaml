@@ -26,9 +26,9 @@ spec:
             - containerPort: 5678
           env:
             - name: GENERIC_TIMEZONE
-              value: "Asia/Kolkata"
+              value: "America/New_York"
             - name: TZ
-              value: "Asia/Kolkata"
+              value: "America/New_York"
             - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
               value: "true"
             - name: N8N_RUNNERS_ENABLED
@@ -36,9 +36,9 @@ spec:
             - name: N8N_SECURE_COOKIE
               value: "true"
             - name: N8N_HOST
-              value: dev.raguls.in
+              value: n8n-dev.cloudlockops.io
             - name: WEBHOOK_URL
-              value: "https://dev.raguls.in/"
+              value: "https://n8n-dev.cloudlockops.io/"
             - name: N8N_PROTOCOL
               value: "https"
 
