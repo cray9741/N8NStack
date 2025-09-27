@@ -25,7 +25,30 @@ echo "Installing N8N..."
 kubectl create ns n8n
 kubectl apply -k /home/adm02/n8n-test/n8n
 echo "Waiting for N8N..."
-kubectl wait --namespace n8n --for=condition=Available deployment --all --timeout=120s
+#Installing ELK
+echo "Installing ELK"
+kubectl create namespace logging
+helm repo add elastic https://helm.elastic.co
+helm repo update
+helm install elasticsearch \
+  --set replicas=1 \
+  elastic/elasticsearch -n logging
+helm install kibana \
+  --set service.type=LoadBalancer \
+  elastic/kibana -n logging
+kubectl wait --namespace logging --for=condition=Available deployment --all --timeout=120s
+
+echo "ELK Username"
+kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.username}' | base64 -d
+
+echo "ELK Password"
+kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+
+
+
+
+
+
 
 
 
