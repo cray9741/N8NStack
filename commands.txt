@@ -1,5 +1,8 @@
 Gets cert for n8n/elastic
 kubectl -n logging get secret elasticsearch-master-certs   -o jsonpath='{.data.ca\.crt}' | base64 -d > es-ca.crt
+kubectl -n n8n get secret n8n-k8s-token -o jsonpath='{.data.ca\.crt}' | base64 -d > ca.crt
+
+
 
 Getting Elastic User & Password:
 ELASTIC_USER=$(kubectl -n logging get secret elasticsearch-master-credentials \
