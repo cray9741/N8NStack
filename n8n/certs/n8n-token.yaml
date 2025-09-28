@@ -1,0 +1,9 @@
+# n8n-k8s token secret (one-time)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: n8n-k8s-token
+  namespace: n8n
+  annotations:
+    kubernetes.io/service-account.name: n8n-k8s
+type: kubernetes.io/service-account-token

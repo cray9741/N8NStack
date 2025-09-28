@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  AWS_ACCESS_KEY_ID: QUtJQVUzNEE3N1pLUVZBRURCNDQ=
+  AWS_SECRET_ACCESS_KEY: dUt6S2UwNWFid0oyWGFzRjlPRjFpdVpKU1dPcFVtaCtqMVdsT21QdA==
+kind: Secret
+metadata:
+  name: aws-credentials
+  namespace: n8n
+type: Opaque

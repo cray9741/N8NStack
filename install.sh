@@ -24,7 +24,13 @@ kubectl apply -k /home/adm02/n8n-test/cert-manager
 echo "Installing N8N..."
 kubectl create ns n8n
 kubectl apply -k /home/adm02/n8n-test/n8n
-echo "Waiting for N8N..."
+kubectl -n n8n patch deployment n8n --type=json -p='[
+  {"op":"add","path":"/spec/template/spec/serviceAccountName","value":"n8n-k8s"},
+  {"op":"add","path":"/spec/template/spec/containers/0/env","value":[
+    {"name":"K8S_BEARER_TOKEN","valueFrom":{"secretKeyRef":{"name":"n8n-k8s-token","key":"token"}}},
+    {"name":"GITHUB_TOKEN","valueFrom":{"secretKeyRef":{"name":"github-token","key":"token"}}}
+  ]}
+]'
 #Installing ELK
 echo "Installing ELK"
 kubectl create namespace logging
