@@ -14,9 +14,13 @@ ELASTIC_PW=$(kubectl -n logging get secret elasticsearch-master-credentials \
 echo "pw=$ELASTIC_USER"
 echo "pw=$ELASTIC_PW"
 
-Create gitub credentials
-kubectl -n n8n create secret generic github-token   --from-literal=token=
+Make files executable
 
-Create AWS credentials
-kubectl -n n8n create secret generic aws-credentials   --from-literal=token=
+chmod +x tf-deploy.sh
+chmod +x install.sh
 
+kubectl -n n8n create secret generic passninja-auth \
+  --from-literal=PASSNINJA_API_KEY='YOUR_KEY' \
+  --from-literal=PASSNINJA_ACCOUNT_ID='YOUR_ACCOUNT_ID'
+
+kubectl -n n8n rollout restart deploy/n8n

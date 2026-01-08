@@ -38,7 +38,7 @@ spec:
             - name: N8N_HOST
               value: n8n-dev.cloudlockops.io
             - name: WEBHOOK_URL
-              value: "https://n8n-dev.cloudlockops.io/"
+              value: "https://hooks-dev.cloudlockops.io/"
             - name: N8N_PROTOCOL
               value: "https"
 
@@ -48,6 +48,17 @@ spec:
                 secretKeyRef:
                   name: n8n-secrets
                   key: N8N_ENCRYPTION_KEY
+            
+            - name: PASSNINJA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: passninja-auth
+                  key: PASSNINJA_API_KEY
+            - name: PASSNINJA_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: passninja-auth
+                  key: PASSNINJA_ACCOUNT_ID
 
             # PostgreSQL backend
             - name: DB_TYPE

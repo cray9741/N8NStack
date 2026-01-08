@@ -37,24 +37,33 @@ spec:
                     secretKeyRef:
                       name: n8n-secrets
                       key: POSTGRES_PASSWORD
+
                 - name: S3_BUCKET
-                  value: "tools-bucket-cloudranger-30293812"
+                  value: "n8n_db_backup"
                 - name: S3_PREFIX
                   value: "backups/n8n/db_backups"
+
+                # AWS creds + region + KMS key from secret created by your script
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: AWS_SECRET_ACCESS_KEY
                 - name: AWS_DEFAULT_REGION
-                  value: "us-east-1"
-                  
-                #---- AWS creds (choose one method) ----
-                # - name: AWS_ACCESS_KEY_ID
-                #   valueFrom:
-                #     secretKeyRef:
-                #       name: aws-credentials
-                #       key: AWS_ACCESS_KEY_ID
-                # - name: AWS_SECRET_ACCESS_KEY
-                #   valueFrom:
-                #     secretKeyRef:
-                #       name: aws-credentials
-                #       key: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: AWS_DEFAULT_REGION
+                - name: KMS_KEY_ARN
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: KMS_KEY_ARN
 
               command:
                 - /bin/sh
@@ -70,7 +79,7 @@ spec:
                   TS="$(date -u +%F_%H%M%S)"
                   KEY="${S3_PREFIX}/n8n_${PGDATABASE}_${TS}.sql.gz"
 
-                  echo "Starting pg_dump..."
+                  echo "Running pg_dump and uploading with SSE-KMS..."
                   pg_dump \
                     --no-owner \
                     --no-privileges \
@@ -79,6 +88,8 @@ spec:
                     -U "${PGUSER}" \
                     "${PGDATABASE}" \
                   | gzip -c \
-                  | aws s3 cp - "s3://${S3_BUCKET}/${KEY}"
+                  | aws s3 cp - "s3://${S3_BUCKET}/${KEY}" \
+                      --sse aws:kms \
+                      --sse-kms-key-id "${KMS_KEY_ARN}"
 
                   echo "Backup uploaded to s3://${S3_BUCKET}/${KEY}"

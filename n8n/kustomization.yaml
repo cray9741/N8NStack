@@ -4,14 +4,12 @@ namespace: n8n
 
 resources:
   - ./bootstrap/secret-bootstrap.yaml
-  - ./bootstrap/aws-creds.yaml
   - ./certs/n8n-tls.yaml
   - ./certs/n8n-token.yaml
   - ./rbac/n8n-jobs-rbac.yaml
   - ./postgres/deployment.yaml
   - ./postgres/service.yaml
   - ./app/deployment.yaml
-  - ./app/postgres-backup.yaml
   - ./app/service.yaml
   - ./traefik/secure-headers.yaml
   - ./traefik/redirect-to-https.yaml
