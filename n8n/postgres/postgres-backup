@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: n8n-pg-backup
+  namespace: n8n
+spec:
+  schedule: "15 2 * * *" # 2:15 AM daily
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 4
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-backup
+              image: tray3rd/postgress-cli:latest
+              env:
+                - name: PGHOST
+                  value: "postgres-service.n8n.svc.cluster.local"
+                - name: PGPORT
+                  value: "5432"
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: n8n-secrets
+                      key: POSTGRES_DB
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: n8n-secrets
+                      key: POSTGRES_USER
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: n8n-secrets
+                      key: POSTGRES_PASSWORD
+
+                # ---- S3 settings ----
+                - name: S3_BUCKET
+                  value: "tools-bucket-cloudranger-30293812"
+                - name: S3_PREFIX
+                  value: "backups/n8n/db_backups"
+
+                # (Optional) If you want a specific region for the bucket:
+                # - name: AWS_REGION
+                #   value: "us-east-1"
+
+                # ---- AWS creds (choose ONE approach) ----
+                # 1) If you use a Kubernetes secret with AWS keys, uncomment these:
+                # - name: AWS_ACCESS_KEY_ID
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: aws-credentials
+                #       key: AWS_ACCESS_KEY_ID
+                # - name: AWS_SECRET_ACCESS_KEY
+                #   valueFrom:
+                #     secretKeyRef:
+                #       name: aws-credentials
+                #       key: AWS_SECRET_ACCESS_KEY
+
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+
+                  TS="$(date -u +%F_%H%M%S)"
+                  KEY="${S3_PREFIX}/n8n_${PGDATABASE}_${TS}.sql.gz"
+
+                  echo "Starting pg_dump from ${PGHOST}:${PGPORT}/${PGDATABASE} ..."
+                  pg_dump --no-owner --no-privileges -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" "${PGDATABASE}" \
+                    | gzip -c \
+                    | aws s3 cp - "s3://${S3_BUCKET}/${KEY}"
+
+                  echo "Backup uploaded to s3://${S3_BUCKET}/${KEY}"
