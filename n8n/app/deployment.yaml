@@ -49,16 +49,16 @@ spec:
                   name: n8n-secrets
                   key: N8N_ENCRYPTION_KEY
             
-            - name: PASSNINJA_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: passninja-auth
-                  key: PASSNINJA_API_KEY
-            - name: PASSNINJA_ACCOUNT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: passninja-auth
-                  key: PASSNINJA_ACCOUNT_ID
+            # - name: PASSNINJA_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: passninja-auth
+            #       key: PASSNINJA_API_KEY
+            # - name: PASSNINJA_ACCOUNT_ID
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: passninja-auth
+            #       key: PASSNINJA_ACCOUNT_ID
 
             # PostgreSQL backend
             - name: DB_TYPE
