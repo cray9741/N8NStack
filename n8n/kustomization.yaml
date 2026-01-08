@@ -11,6 +11,7 @@ resources:
   - ./postgres/deployment.yaml
   - ./postgres/service.yaml
   - ./app/deployment.yaml
+  - ./app/postgres-backup.yaml
   - ./app/service.yaml
   - ./traefik/secure-headers.yaml
   - ./traefik/redirect-to-https.yaml
