@@ -17,7 +17,6 @@ spec:
               value: "postgres-service.n8n.svc.cluster.local"
             - name: PGPORT
               value: "5432"
-
             - name: PGDATABASE
               valueFrom:
                 secretKeyRef:
@@ -33,11 +32,13 @@ spec:
                 secretKeyRef:
                   name: n8n-secrets
                   key: POSTGRES_PASSWORD
-
             - name: S3_BUCKET
               value: "tools-bucket-cloudranger-30293812"
             - name: S3_PREFIX
               value: "backups/n8n/db_backups"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-1"
+
 
             # ---- AWS creds (use one method) ----
             # If using a secret:
